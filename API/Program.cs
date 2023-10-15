@@ -1,7 +1,9 @@
-using Application.Group;
-using Application.Repository;
+using Application.IRepositories;
+using Application.IServices;
+using Application.Services;
 using Infrastructure;
-using Infrastructure.Repository;
+using Infrastructure.Middleware;
+using Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -17,11 +19,17 @@ builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnC
 
 builder.Services.AddScoped<IGroupService, GroupService>();
 builder.Services.AddScoped<IBackupRepository, BackupRepository>();
+builder.Services.AddScoped<IBackupService, BackupService>();
+builder.Services.AddScoped<IRestClientService, RestClientService>();
 
 builder.Services.AddDbContext<GitLabDbContext>(options => options.UseSqlite(
     builder.Configuration.GetConnectionString("DefaultConnection")));
 
 var app = builder.Build();
+
+app.UseMiddleware<GlobalRoutePrefixMiddleware>("/api");
+app.UsePathBase(new PathString("/api"));
+app.UseRouting();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -29,7 +37,6 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
 app.UseHttpsRedirection();
 
 app.UseAuthorization();

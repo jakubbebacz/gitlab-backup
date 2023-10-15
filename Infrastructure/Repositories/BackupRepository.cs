@@ -1,7 +1,9 @@
-﻿using Application.Group;
+﻿using Application.IRepositories;
+using Application.Models.Backup;
 using Domain;
+using Microsoft.EntityFrameworkCore;
 
-namespace Infrastructure.Repository;
+namespace Infrastructure.Repositories;
 
 public class BackupRepository : IBackupRepository
 {
@@ -12,9 +14,9 @@ public class BackupRepository : IBackupRepository
         _gitLabDbContext = gitLabDbContext;
     }
     
-    public List<Domain.Backup> GetAllBackups()
+    public async Task<List<Backup>> GetAllBackups()
     {
-        var data = _gitLabDbContext.Backups.ToList();
+        var data = await _gitLabDbContext.Backups.ToListAsync();
         var latestBackups = data.OfType<Backup>()
             .GroupBy(b => b.GroupId)
             .Select(b => b.MaxBy(x => x.CreatedAt))
@@ -23,16 +25,29 @@ public class BackupRepository : IBackupRepository
         return latestBackups;
     }
 
-    public Backup GetLatestBackup(int groupId)
+    public async Task<Backup> GetLatestBackup(int groupId)
     {
-        return _gitLabDbContext.Backups.LastOrDefault(b => b.GroupId == groupId);
+        var backup = await _gitLabDbContext.Backups
+            .LastOrDefaultAsync(b => b.GroupId == groupId);
+        return backup;
     }
 
-    public Backup CreateBackup(Backup request)
+    public async Task<Guid> CreateBackup(CreateBackupRequest request)
     {
-        _gitLabDbContext.Backups.Add(request);
-        _gitLabDbContext.SaveChanges();
+        var backup = new Backup
+        {
+            BackupId = new Guid(),
+            GroupId = request.GroupId,
+            BackupName = request.BackupName,
+            BackupPath = request.BackupPath,
+            BackupDescription = request.BackupDescription,
+            Visibility = request.Visibility,
+            CreatedAt = request.CreatedAt
+        };
+        
+        var response = _gitLabDbContext.Backups.Add(backup);
+        await _gitLabDbContext.SaveChangesAsync();
 
-        return request;
+        return response.Entity.BackupId;
     }
 }

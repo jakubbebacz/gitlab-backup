@@ -1,12 +1,13 @@
-﻿using Domain;
+﻿using Application.Models.Backup;
+using Domain;
 
-namespace Application.Group;
+namespace Application.IRepositories;
 
 public interface IBackupRepository
 {
-    List<Domain.Backup> GetAllBackups();
+    Task<List<Backup>> GetAllBackups();
 
-    public Backup GetLatestBackup(int groupId);
+    public Task<Backup> GetLatestBackup(int groupId);
 
-    Domain.Backup CreateBackup(Backup request);
+    Task<Guid> CreateBackup(CreateBackupRequest backup);
 }

@@ -1,12 +1,14 @@
-﻿using Application.Models.Backup;
+﻿using Application.Models.Group;
 
-namespace Application.Repository;
+namespace Application.IServices;
 
 public interface IGroupService
 {
-    List<GroupResponse> GetAllGroups();
+    Task<List<GroupResponse>> GetAllGroups();
 
-    int CreateGroup(int groupId);
+    Task<GroupResponse> GetGroup(int groupId);
 
-    Domain.Backup CreateBackup(int groupId, bool isSimple);
+    Task CreateGroup(CreateGroupRequest createGroupRequest);
+
+    
 }
