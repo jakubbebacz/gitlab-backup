@@ -1,6 +1,7 @@
 ﻿using Application.IRepositories;
 using Application.Models.Label;
 using Domain;
+using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Repositories;
 
@@ -12,8 +13,13 @@ public class LabelRepository : ILabelRepository
     {
         _gitLabDbContext = gitLabDbContext;
     }
-    
-    public async Task CreateLabels(List<CreateLabelsRequest> request)
+
+    public async Task<List<Label>> GetBackupLabels(Guid backupId)
+    {
+        return await _gitLabDbContext.Labels.ToListAsync();
+    }
+
+    public async Task CreateLabels(List<CreateLabelRequest> request)
     {
         foreach (var label in request.Select(createLabelRequest => new Label
                  {

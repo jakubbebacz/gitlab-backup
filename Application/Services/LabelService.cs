@@ -1,6 +1,5 @@
 ﻿using Application.IRepositories;
 using Application.IServices;
-using Application.Models.Backup;
 using Application.Models.Label;
 using Newtonsoft.Json;
 using RestSharp;
@@ -17,8 +16,50 @@ public class LabelService : ILabelService
         _restClientService = restClientService;
         _labelRepository = labelRepository;
     }
+
+    public async Task AddGroupLabels(int groupId, Guid backupId)
+    {
+        var labels = await GetGroupLabels(groupId);
+        var createLabelsRequest = labels.Select(response => new CreateLabelRequest
+        {
+            LabelName = response.Name,
+            Color = response.Color,
+            LabelDescription = response.Description,
+            BackupId = backupId
+        }).ToList();
+
+        await _labelRepository.CreateLabels(createLabelsRequest);
+    }
+
+    public async Task RestoreGroupLabels(Guid backupId, int groupId)
+    {
+        var labels = await _labelRepository.GetBackupLabels(backupId);
+
+        var restoreLabelsRequest = labels.Select(l => new RestoreLabelRequest
+        {
+            GroupId = groupId,
+            LabelName = l.LabelName,
+            Color = l.Color,
+            LabelDescription = l.LabelDescription
+        }).ToList();
+
+        var client = _restClientService.CreateClient();
+
+        var request = new RestRequest($"groups/{groupId}/labels", Method.Post);
+
+        foreach (var restoreLabelRequest in restoreLabelsRequest.Select(JsonConvert.SerializeObject))
+        {
+            request.AddJsonBody(restoreLabelRequest);
+
+            var response = await client.ExecuteAsync(request);
+            if (!response.IsSuccessful)
+            {
+                throw new Exception("Something went wrong");
+            }
+        }
+    }
     
-    public async Task<List<LabelResponse>> GetGroupLabels(int groupId)
+    private async Task<List<LabelResponse>> GetGroupLabels(int groupId)
     {
         var client = _restClientService.CreateClient();
 
@@ -30,22 +71,7 @@ public class LabelService : ILabelService
         {
             return JsonConvert.DeserializeObject<List<LabelResponse>>(response.Content);
         }
-        throw new Exception();
+
+        throw new Exception("Something went wrong");
     }
-
-    public async Task AddGroupLabels(int groupId, Guid backupId)
-    {
-        var labels = await GetGroupLabels(groupId);
-        var createLabelsRequest = labels.Select(response => new CreateLabelsRequest
-        {
-            GroupId = response.GroupId,
-            LabelName = response.LabelName,
-            Color = response.Color,
-            LabelDescription = response.LabelDescription,
-            BackupId = backupId
-        }).ToList();
-
-        await _labelRepository.CreateLabels(createLabelsRequest);
-    }
-
 }

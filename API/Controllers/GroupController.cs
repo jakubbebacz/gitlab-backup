@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
 {
-    [Route("/groups")]
+    [Route("groups")]
     [ApiController]
     public class GroupController : ControllerBase
     {
@@ -14,12 +14,12 @@ namespace API.Controllers
         {
             _groupService = groupService;
         }
-        
+
         [HttpGet]
         public async Task<ActionResult<List<GroupResponse>>> GetAllGroups()
         {
             var groups = await _groupService.GetAllGroups();
-            return Ok(groups);
+            return StatusCode(StatusCodes.Status200OK, groups);
         }
     }
 }

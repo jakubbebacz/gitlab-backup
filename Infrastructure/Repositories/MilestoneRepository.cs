@@ -1,6 +1,7 @@
 ﻿using Application.IRepositories;
 using Application.Models.Milestone;
 using Domain;
+using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Repositories;
 
@@ -12,21 +13,25 @@ public class MilestoneRepository : IMilestoneRepository
     {
         _gitLabDbContext = gitLabDbContext;
     }
-    
-    public async Task CreateMilestones(List<CreateMilestonesRequest> request)
+
+    public async Task<List<Milestone>> GetBackupMilestones(Guid backupId)
     {
-        foreach (var milestone in request.Select(createMilestonesRequest => new Milestone
-                 {
-                     MilestoneId = new Guid(),
-                     BackupId = createMilestonesRequest.BackupId,
-                     MilestoneTitle = createMilestonesRequest.MilestoneTitle,
-                     DueDate = createMilestonesRequest.DueDate,
-                     StartDate = createMilestonesRequest.StartDate,
-                     MilestoneDescription = createMilestonesRequest.MilestoneDescription
-                 }))
+        return await _gitLabDbContext.Milestones.ToListAsync();
+    }
+
+    public async Task CreateMilestones(List<CreateMilestoneRequest> request)
+    {
+        request.Select(createMilestonesRequest => new Milestone
         {
-            _gitLabDbContext.Milestones.Add(milestone);
-        }
+            MilestoneId = new Guid(),
+            BackupId = createMilestonesRequest.BackupId,
+            MilestoneTitle = createMilestonesRequest.MilestoneTitle,
+            DueDate = createMilestonesRequest.DueDate,
+            StartDate = createMilestonesRequest.StartDate,
+            MilestoneDescription = createMilestonesRequest.MilestoneDescription
+        })
+            .ToList()
+            .ForEach(m => _gitLabDbContext.Milestones.Add(m));
 
         await _gitLabDbContext.SaveChangesAsync();
     }

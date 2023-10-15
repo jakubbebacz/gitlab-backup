@@ -13,7 +13,7 @@ public class BackupRepository : IBackupRepository
     {
         _gitLabDbContext = gitLabDbContext;
     }
-    
+
     public async Task<List<Backup>> GetAllBackups()
     {
         var data = await _gitLabDbContext.Backups.ToListAsync();
@@ -28,7 +28,8 @@ public class BackupRepository : IBackupRepository
     public async Task<Backup> GetLatestBackup(int groupId)
     {
         var backup = await _gitLabDbContext.Backups
-            .LastOrDefaultAsync(b => b.GroupId == groupId);
+            .OrderByDescending(b => b.CreatedAt)
+            .FirstOrDefaultAsync(b => b.GroupId == groupId);
         return backup;
     }
 
@@ -44,7 +45,7 @@ public class BackupRepository : IBackupRepository
             Visibility = request.Visibility,
             CreatedAt = request.CreatedAt
         };
-        
+
         var response = _gitLabDbContext.Backups.Add(backup);
         await _gitLabDbContext.SaveChangesAsync();
 

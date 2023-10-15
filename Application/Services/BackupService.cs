@@ -1,11 +1,7 @@
-﻿using System.Transactions;
-using Application.IRepositories;
+﻿using Application.IRepositories;
 using Application.IServices;
 using Application.Models.Backup;
 using Application.Models.Group;
-using Application.Models.Label;
-using Domain;
-using RestSharp;
 
 namespace Application.Services;
 
@@ -37,8 +33,8 @@ public class BackupService : IBackupService
             GroupId = b.GroupId,
             BackupName = b.BackupName,
             BackupPath = b.BackupPath,
-            BackupDescription = b.BackupDescription ?? "",
-            Visibility = b.Visibility ?? "private"
+            Visibility = b.Visibility!,
+            BackupDescription = b.BackupDescription ?? string.Empty
         }).ToList();
 
         return response;
@@ -46,42 +42,37 @@ public class BackupService : IBackupService
 
     public async Task<Guid> CreateBackup(int groupId, bool isSimple)
     {
-        using var transaction = new TransactionScope();
         try
         {
             var group = await _groupService.GetGroup(groupId);
 
             var createBackupRequest = new CreateBackupRequest
             {
-                GroupId = group.GroupId,
-                BackupName = group.GroupName,
-                BackupPath = group.GroupPath,
+                GroupId = group.Id,
+                BackupName = group.Name,
+                BackupPath = group.Path,
                 Visibility = group.Visibility,
-                BackupDescription = group.GroupDescription,
+                BackupDescription = group.Description,
                 CreatedAt = DateTime.Now
             };
 
             var backupId = await _backupRepository.CreateBackup(createBackupRequest);
 
-            if (!isSimple)
-            {
-                await _labelService.AddGroupLabels(groupId, backupId);
-                await _milestoneService.AddGroupMilestones(groupId, backupId);
-            }
+            if (isSimple) return backupId;
 
-            transaction.Complete();
+            await _labelService.AddGroupLabels(groupId, backupId);
+            await _milestoneService.AddGroupMilestones(groupId, backupId);
+
             return backupId;
         }
         catch (Exception)
         {
-            transaction.Dispose();
-            throw;
+            throw new Exception("Something went wrong");
         }
     }
 
     public async Task<Guid> RestoreBackup(int groupId)
     {
-        using var transaction = new TransactionScope();
         try
         {
             var backup = await _backupRepository.GetLatestBackup(groupId);
@@ -89,18 +80,27 @@ public class BackupService : IBackupService
             {
                 Name = backup.BackupName,
                 Path = backup.BackupPath,
-                Visibility = backup.Visibility ?? "",
-                Description = backup.BackupDescription ?? "private"
+                Visibility = backup.Visibility!,
+                Description = backup.BackupDescription ?? string.Empty
             };
 
             await _groupService.CreateGroup(groupRequest);
-            transaction.Complete();
+
+            if (backup.Labels.Any())
+            {
+               await _labelService.RestoreGroupLabels(backup.BackupId, groupId);
+            }
+
+            if (backup.Milestones.Any())
+            {
+                await _milestoneService.RestoreGroupMilestones(backup.BackupId, groupId);
+            }
+
             return backup.BackupId;
         }
         catch (Exception)
         {
-            transaction.Dispose();
-            throw;
+            throw new Exception("Something went wrong");
         }
     }
 }

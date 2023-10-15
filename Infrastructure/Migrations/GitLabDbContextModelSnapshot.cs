@@ -19,38 +19,38 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Backup", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<Guid>("BackupId")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("BackupDescription")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("BackupName")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("BackupPath")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Description")
-                        .HasColumnType("TEXT");
-
                     b.Property<int>("GroupId")
                         .HasColumnType("INTEGER");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Path")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
 
                     b.Property<string>("Visibility")
                         .HasColumnType("TEXT");
 
-                    b.HasKey("Id");
+                    b.HasKey("BackupId");
 
                     b.ToTable("Backups");
                 });
 
             modelBuilder.Entity("Domain.Label", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<Guid>("LabelId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
@@ -61,14 +61,14 @@ namespace Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Description")
+                    b.Property<string>("LabelDescription")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Name")
+                    b.Property<string>("LabelName")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.HasKey("Id");
+                    b.HasKey("LabelId");
 
                     b.HasIndex("BackupId");
 
@@ -77,27 +77,27 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Milestone", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<Guid>("MilestoneId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
                     b.Property<Guid>("BackupId")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Description")
+                    b.Property<DateTime>("DueDate")
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTime>("DueDate")
+                    b.Property<string>("MilestoneDescription")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("MilestoneTitle")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
+                    b.HasKey("MilestoneId");
 
                     b.HasIndex("BackupId");
 

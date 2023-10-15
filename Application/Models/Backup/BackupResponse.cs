@@ -3,7 +3,7 @@
 public class BackupResponse
 {
     public Guid BackupId { get; set; }
-    
+
     public int GroupId { get; set; }
 
     public string BackupName { get; set; } = default!;

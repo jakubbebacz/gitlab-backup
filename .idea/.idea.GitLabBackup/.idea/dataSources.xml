@@ -1,16 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
-    <data-source source="LOCAL" name="database" uuid="d3a06c1f-0224-4e2d-bd8c-fe10527dbcd0">
+    <data-source source="LOCAL" name="database" uuid="1bd4e81a-ed33-4026-b030-c94c4cb13662">
       <driver-ref>sqlite.xerial</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>org.sqlite.JDBC</jdbc-driver>
-      <jdbc-url>jdbc:sqlite:C:\Users\asd\RiderProjects\gitlab-backup\API\database.db</jdbc-url>
+      <jdbc-url>jdbc:sqlite:C:\Users\jakub\RiderProjects\GitLabBackup\API\database.db</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
       <libraries>
-        <library>
-          <url>file://$APPLICATION_CONFIG_DIR$/jdbc-drivers/Xerial SQLiteJDBC/3.43.0/org/xerial/sqlite-jdbc/3.43.0.0/sqlite-jdbc-3.43.0.0.jar</url>
-        </library>
         <library>
           <url>file://$APPLICATION_CONFIG_DIR$/jdbc-drivers/Xerial SQLiteJDBC/3.43.0/org/xerial/sqlite-jdbc/3.43.0.0/sqlite-jdbc-3.43.0.0.jar</url>
         </library>

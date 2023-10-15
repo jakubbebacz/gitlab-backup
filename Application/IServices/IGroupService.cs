@@ -9,6 +9,4 @@ public interface IGroupService
     Task<GroupResponse> GetGroup(int groupId);
 
     Task CreateGroup(CreateGroupRequest createGroupRequest);
-
-    
 }

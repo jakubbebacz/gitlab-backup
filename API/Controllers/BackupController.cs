@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
 {
-    [Route("/backups")]
+    [Route("backups")]
     [ApiController]
     public class BackupController : ControllerBase
     {
@@ -15,26 +15,26 @@ namespace API.Controllers
         {
             _backupService = backupService;
         }
-        
+
         [HttpGet]
         public async Task<ActionResult<List<BackupResponse>>> GetAllBackups()
         {
             var backups = await _backupService.GetAllBackups();
-            return Ok(backups);
+            return StatusCode(StatusCodes.Status200OK, backups);
         }
-        
+
         [HttpPost("/{groupId:int}")]
-        public async Task<ActionResult<Backup>> CreateBackup([FromRoute]int groupId, [FromQuery]bool isSimple)
+        public async Task<ActionResult<Backup>> CreateBackup([FromRoute] int groupId, [FromQuery] bool isSimple)
         {
             var backup = await _backupService.CreateBackup(groupId, isSimple);
-            return Ok(backup);
+            return StatusCode(StatusCodes.Status201Created, backup);
         }
-        
-        [HttpPost("/{groupId:int}/backup")]
-        public async Task<ActionResult<Backup>> RestoreBackup([FromRoute]int groupId)
+
+        [HttpPost("/{groupId:int}/restore")]
+        public async Task<ActionResult<Backup>> RestoreBackup([FromRoute] int groupId)
         {
             var backup = await _backupService.RestoreBackup(groupId);
-            return Ok(backup);
+            return StatusCode(StatusCodes.Status201Created, backup);
         }
     }
 }
