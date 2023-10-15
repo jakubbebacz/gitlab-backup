@@ -1,8 +1,8 @@
-﻿namespace Domain;
+﻿namespace Application.Models.Label;
 
-public class Label
+public class CreateLabelsRequest
 {
-    public Guid LabelId { get; set; }
+    public int GroupId { get; set; }
 
     public string LabelName { get; set; } = default!;
     
@@ -11,5 +11,4 @@ public class Label
     public string? LabelDescription { get; init; }
     
     public Guid BackupId { get; set; }
-    public Backup Backup { get; set; } = default!;
 }

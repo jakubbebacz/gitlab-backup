@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(GitLabDbContext))]
-    [Migration("20231012224821_InitMigration")]
+    [Migration("20231014093300_InitMigration")]
     partial class InitMigration
     {
         /// <inheritdoc />
@@ -22,13 +22,18 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Backup", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Description")
-                        .IsRequired()
                         .HasColumnType("TEXT");
+
+                    b.Property<int>("GroupId")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -39,7 +44,6 @@ namespace Infrastructure.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Visibility")
-                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
@@ -49,58 +53,47 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Label", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("BackupId")
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Color")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Description")
-                        .IsRequired()
                         .HasColumnType("TEXT");
-
-                    b.Property<int>("GroupId")
-                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("TextColor")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
                     b.HasKey("Id");
+
+                    b.HasIndex("BackupId");
 
                     b.ToTable("Labels");
                 });
 
             modelBuilder.Entity("Domain.Milestone", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("BackupId")
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Description")
-                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("DueDate")
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("GroupId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("IsExpired")
-                        .HasColumnType("INTEGER");
-
                     b.Property<DateTime>("StartDate")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("State")
-                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Title")
@@ -109,7 +102,38 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("BackupId");
+
                     b.ToTable("Milestones");
+                });
+
+            modelBuilder.Entity("Domain.Label", b =>
+                {
+                    b.HasOne("Domain.Backup", "Backup")
+                        .WithMany("Labels")
+                        .HasForeignKey("BackupId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Backup");
+                });
+
+            modelBuilder.Entity("Domain.Milestone", b =>
+                {
+                    b.HasOne("Domain.Backup", "Backup")
+                        .WithMany("Milestones")
+                        .HasForeignKey("BackupId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Backup");
+                });
+
+            modelBuilder.Entity("Domain.Backup", b =>
+                {
+                    b.Navigation("Labels");
+
+                    b.Navigation("Milestones");
                 });
 #pragma warning restore 612, 618
         }

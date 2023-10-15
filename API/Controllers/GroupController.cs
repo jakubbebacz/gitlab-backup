@@ -1,11 +1,10 @@
-using Application.Models.Backup;
-using Application.Repository;
-using Domain;
+using Application.IServices;
+using Application.Models.Group;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("/groups")]
     [ApiController]
     public class GroupController : ControllerBase
     {
@@ -15,19 +14,12 @@ namespace API.Controllers
         {
             _groupService = groupService;
         }
-        // GET: api/Repository
-        [HttpGet]
-        public ActionResult<List<GroupResponse>> Get()
-        {
-            var groups = _groupService.GetAllGroups();
-            return Ok(groups);
-        }
         
-        [HttpPost("/{groupId:int}")]
-        public ActionResult<Backup> CreateBackup([FromRoute]int groupId, [FromBody]bool isSimple)
+        [HttpGet]
+        public async Task<ActionResult<List<GroupResponse>>> GetAllGroups()
         {
-            var backup = _groupService.CreateBackup(groupId, isSimple);
-            return Ok(backup);
+            var groups = await _groupService.GetAllGroups();
+            return Ok(groups);
         }
     }
 }

@@ -1,9 +1,7 @@
-﻿namespace Domain;
+﻿namespace Application.Models.Backup;
 
-public class Backup
+public class CreateBackupRequest
 {
-    public Guid BackupId { get; set; }
-
     public int GroupId { get; set; }
 
     public string BackupName { get; set; } = default!;
@@ -15,8 +13,4 @@ public class Backup
     public string? Visibility { get; init; }
     
     public DateTime CreatedAt { get; set; }
-    
-    public ICollection<Label>? Labels { get; set; }
-    
-    public ICollection<Milestone>? Milestones { get; set; }
 }

@@ -1,8 +1,8 @@
-﻿namespace Domain;
+﻿namespace Application.Models.Milestone;
 
-public class Milestone
+public class CreateMilestonesRequest
 {
-    public Guid MilestoneId { get; set; }
+    public int GroupId { get; set; }
 
     public string MilestoneTitle { get; set; } = default!;
     
@@ -11,7 +11,6 @@ public class Milestone
     public DateTime StartDate { get; set; }
     
     public string? MilestoneDescription { get; init; }
-
+    
     public Guid BackupId { get; set; }
-    public Backup Backup { get; set; } = default!;
 }

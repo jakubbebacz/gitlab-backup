@@ -1,97 +1,55 @@
-﻿using Application.Group;
-using Application.Models.Backup;
+﻿using Application.IServices;
 using Application.Models.Group;
-using Domain;
 using Newtonsoft.Json;
 using RestSharp;
-using Microsoft.Extensions.Configuration;
+using System.Text.Json;
+using Application.Models.Backup;
 
-namespace Application.Repository;
+namespace Application.Services;
 
 public class GroupService : IGroupService
 {
-    private readonly IBackupRepository _backupRepository;
-    private readonly IConfiguration _configuration;
+    private readonly IRestClientService _restClientService;
 
-    public GroupService(IBackupRepository backupRepository, IConfiguration configuration)
+    public GroupService(IRestClientService restClientService)
     {
-        _backupRepository = backupRepository;
-        _configuration = configuration;
+        _restClientService = restClientService;
     }
 
-    public List<GroupResponse> GetAllGroups()
+    public async Task<List<GroupResponse>> GetAllGroups()
     {
-        var rootPath = _configuration.GetSection("GitLab:GitLabRootPath").Value;
-        var PAT = _configuration.GetSection("GitLab:PersonalAccessToken").Value;
+        var client = _restClientService.CreateClient();
 
-        var client = new RestClient(rootPath);
-        client.AddDefaultParameter("private_token", PAT);
+        var request = new RestRequest("groups");
 
-        var request = new RestRequest("groups", Method.Get);
-
-        var response = client.Execute(request);
+        var response = await client.ExecuteAsync(request);
 
         if (response.IsSuccessful)
         {
             return JsonConvert.DeserializeObject<List<GroupResponse>>(response.Content!);
         }
-        else
-        {
-            Console.WriteLine($"Request failed with status code {response.StatusCode}");
-            Console.WriteLine($"Error message: {response.ErrorMessage}");
-        }
-
-        return null;
+        throw new Exception();
     }
 
-    public int CreateGroup(int groupId)
+    public async Task<GroupResponse> GetGroup(int groupId)
     {
-        var rootPath = _configuration.GetSection("GitLab:GitLabRootPath").Value;
-        var PAT = _configuration.GetSection("GitLab:PersonalAccessToken").Value;
+        var client = _restClientService.CreateClient();
+        var request = new RestRequest($"groups/{groupId}");
 
-        var client = new RestClient(rootPath);
-        client.AddDefaultParameter("private_token", PAT);
+        var response = await client.ExecuteAsync(request);
 
-        var backup = _backupRepository.GetLatestBackup(groupId);
-        var group = new CreateGroupRequest
-        {
-            Name = backup.Name,
-            Path = backup.Path,
-            Visibility = backup.Visibility,
-            Description = backup.Description
-        };
+        return JsonConvert.DeserializeObject<GroupResponse>(response.Content!);
+    }
 
-        var request = new RestRequest($"groups", Method.Post);
-        request.AddJsonBody(group);
+    public async Task CreateGroup(CreateGroupRequest createGroupRequest)
+    {
+        var client = _restClientService.CreateClient();
         
-        var response = client.Execute(request);
-        return backup.Id;
-    }
+        var request = new RestRequest($"groups", Method.Post);
+        
+        var jsonRequest = JsonConvert.SerializeObject(createGroupRequest);
+        request.AddJsonBody(jsonRequest);
 
-    public Backup CreateBackup(int groupId, bool isSimple)
-    {
-        var rootPath = _configuration.GetSection("GitLab:GitLabRootPath").Value;
-        var PAT = _configuration.GetSection("GitLab:PersonalAccessToken").Value;
-
-        var client = new RestClient(rootPath);
-        client.AddDefaultParameter("private_token", PAT);
-
-        var request = new RestRequest($"groups/{groupId}", Method.Get);
-
-        var response = client.Execute(request);
-
-        var data = JsonConvert.DeserializeObject<GroupResponse>(response.Content!);
-
-        var backup = new Backup
-        {
-            Id = data.Id,
-            Name = data.Name,
-            Path = data.Path,
-            Visibility = "private",
-            Description = "123",
-            CreatedAt = DateTime.Now
-        };
-
-        return _backupRepository.CreateBackup(backup);
+        await client.ExecuteAsync(request);
     }
 }
